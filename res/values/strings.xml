@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">SnapJoinAndroid</string>
+    <string name="all_user_url">http://10.0.0.2:9000/users</string>
+    <string name="user_by_email_password">byemailandpassword</string>
+
+</resources>
