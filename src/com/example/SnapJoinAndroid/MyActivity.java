@@ -46,7 +46,7 @@ public class MyActivity extends Activity {
         emailText = (EditText)this.findViewById(R.id.emailText);emailText.setText("ki@gmail.com");
         passwordText = (EditText)this.findViewById(R.id.passwdText);passwordText.setText("mypassword");
 
-
+        //CreateUser Button
         jsonview = (TextView) this.findViewById(R.id.jsonview);
         postbutton = (Button) this.findViewById(R.id.button);
         postbutton.setOnClickListener(new View.OnClickListener() {
@@ -57,7 +57,7 @@ public class MyActivity extends Activity {
 
             }
         });
-
+       //GetAllUser button
         getButton = (Button) this.findViewById(R.id.GetButton);
         getButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -66,12 +66,13 @@ public class MyActivity extends Activity {
                 AsyncTask<String, Void, String> result = new GetAllUsers().execute(getString(R.string.all_user_url)+"/all");
             }
         });
-
+        //Login button
         loginButton = (Button)this.findViewById(R.id.loginbutton);
         loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 jsonview.setText("");
+                //Validate email and password text field to make sure they are not empty
                 String inputEmail = emailText.getText().toString();
                 String inputPassword = passwordText.getText().toString();
               if(inputEmail.equals("")){
@@ -79,9 +80,9 @@ public class MyActivity extends Activity {
               }else if(inputPassword.equals("")){
                   Toast.makeText(getApplicationContext(),"Please type your password",Toast.LENGTH_SHORT).show();
               }
-                String url = getString(R.string.all_user_url)+"/"+inputEmail +"/"+inputPassword+"/"+getString(R.string.user_by_email_password);
+                String url = getString(R.string.login);
 
-                AsyncTask<String,Void,String> ressult = new FindUserByEmailandPassword().execute(url);
+                AsyncTask<String,Void,String> ressult = new Login().execute(url);
             }
         });
 
@@ -134,6 +135,54 @@ public class MyActivity extends Activity {
 
         }
 
+    }
+
+    /**
+     * HTTP POST: find user by email and password, will use for log in
+     */
+    class Login extends AsyncTask<String,Void,String>{
+
+        @Override
+        protected String doInBackground(String... urls) {
+            JSONObject jsonObject = new JSONObject();
+            try {
+                /**
+                 * TODO: will change this later by dynamic from Android UI
+                 */
+
+                jsonObject.accumulate("email",emailText.getText());
+                jsonObject.accumulate("password", passwordText.getText());
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            } catch(Exception ex){
+                ex.printStackTrace();
+            }
+            return POST(urls[0], jsonObject);
+        }
+
+        protected void onPostExecute(String result){
+            //Parse Json object
+
+            JSONObject jsonObject = null;
+            try {
+
+                if(result ==null || result.contains("ERROR")){
+                    Toast.makeText(getApplicationContext(),"Oops...Email and Password do not match",Toast.LENGTH_SHORT).show();
+                    return ;
+                }
+                jsonObject = new JSONObject(result);
+
+                String authToken = jsonObject.getString("authToken");
+
+                if (jsonObject != null) {
+
+                    jsonview.setText("login in successfully with authToken: " + authToken);
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     /**
@@ -280,8 +329,9 @@ public class MyActivity extends Activity {
 
 
             // 4. convert JSONObject to JSON to String
-            json = jsonObject.toString();
-
+            if(jsonObject != null) {
+                json = jsonObject.toString();
+            }
             // ** Alternative way to convert Person object to JSON string usin Jackson Lib
             // ObjectMapper mapper = new ObjectMapper();
             // json = mapper.writeValueAsString(person);
